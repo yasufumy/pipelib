@@ -1,1 +1,1 @@
-from datalib.core import Dataset
+from datalib.core import Dataset, text, directory
