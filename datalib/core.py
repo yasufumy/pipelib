@@ -1,4 +1,6 @@
 from itertools import chain, islice
+from functools import wraps
+from pathlib import Path
 
 
 class Dataset:
@@ -49,3 +51,47 @@ class PipelinedDataset(Dataset):
 
     def __iter__(self):
         yield from self._func(self._data)
+
+
+class _Repeat:
+    def __init__(self, func, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        self._func = func
+
+    def __iter__(self):
+        return self._func(*self._args, **self._kwargs)
+
+
+def _repeated(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return _Repeat(func, *args, **kwargs)
+    return wrapper
+
+
+def text(filepath, encoding='utf-8'):
+    filepath = Path(filepath)
+
+    assert filepath.is_file()
+
+    @_repeated
+    def i():
+        with filepath.open(encoding=encoding) as f:
+            for line in f:
+                yield line[:-1]
+
+    return Dataset(i())
+
+
+def directory(dirpath, pattern='*'):
+    dirpath = Path(dirpath)
+
+    assert dirpath.is_dir()
+
+    @_repeated
+    def i():
+        for path in dirpath.glob(pattern):
+            yield str(path)
+
+    return Dataset(i())
