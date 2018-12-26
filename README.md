@@ -78,14 +78,14 @@ data = TextDataset('ptb.train.txt')
 
 Take a look at the first item:
 
-```
+```py
 >>> data.first()
 ' aer banknote berlitz calloway centrust cluett fromstein gitano guterman hydro-quebec ipo kia memotec mlx nahb punts rake regatta rubens sim snack-food ssangyong swapo wachter '
 ```
 
 Split by space and drop the items which include more than 10 words:
 
-```
+```py
 >>> data.map(lambda x: x.strip().split()).filter(lambda x: len(x) < 10).take(5)
 [['a', '<unk>', '<unk>', 'said', 'this', 'is', 'an', 'old', 'story'],
  ['there', 'is', 'no', 'asbestos', 'in', 'our', 'products', 'now'],
