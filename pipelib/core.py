@@ -13,6 +13,9 @@ class Dataset:
     def __iter__(self):
         yield from self._dataset
 
+    def apply(self, func):
+        return PipelinedDataset(self, func)
+
     def map(self, map_func):
         def f(dataset):
             return map(map_func, dataset)
