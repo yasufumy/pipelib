@@ -10,6 +10,18 @@ class DatasetTestCase(TestCase):
         self.base = range(100)
         self.data = Dataset(self.base)
 
+    def test_apply(self):
+        def f(dataset):
+            for x in dataset:
+                if x % 2 == 0:
+                    yield x ** 2
+
+        data = self.data.apply(f)
+        expected = f(self.base)
+
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
     def test_map(self):
         def f(x):
             return x ** 2
