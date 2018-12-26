@@ -1,7 +1,7 @@
 from unittest import TestCase
 import tempfile
 
-from datalib import Dataset, text, directory
+from datalib import Dataset, TextDataset, DirDataset
 
 
 class DatasetTestCase(TestCase):
@@ -62,7 +62,7 @@ class DatasetTestCase(TestCase):
         self.assertEqual(data, expected)
 
 
-class TextTestCase(TestCase):
+class TextDatasetTestCase(TestCase):
     def test_text(self):
         lines = ['This is a test .', 'That is also a test .']
         fp = tempfile.NamedTemporaryFile()
@@ -70,20 +70,20 @@ class TextTestCase(TestCase):
             fp.write(f'{x}\n'.encode('utf-8'))
         fp.seek(0)
 
-        data = text(fp.name)
+        data = TextDataset(fp.name)
         for x, y in zip(data, lines):
             self.assertEqual(x, y)
 
         fp.close()
 
 
-class DirectoryTestCase(TestCase):
+class DirDatasetTestCase(TestCase):
     def test_directory(self):
         tempdir = tempfile.TemporaryDirectory()
         expected = [tempfile.NamedTemporaryFile(dir=tempdir.name).name
                     for _ in range(2)]
 
-        data = directory(tempdir.name)
+        data = DirDataset(tempdir.name)
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
