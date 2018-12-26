@@ -54,6 +54,13 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
+    def test_method_chain(self):
+        data = self.data.filter(lambda x: x % 2 == 0).map(lambda x: x ** 2)
+        expected = [x ** 2 for x in self.base if x % 2 == 0]
+
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
     def test_collect(self):
         data = self.data.collect()
         expected = list(self.base)
@@ -71,7 +78,7 @@ class DatasetTestCase(TestCase):
         data = self.data.take(n)
         expected = list(self.base[:n])
 
-        self.assertEqual(data, expected)
+        self.assertListEqual(data, expected)
 
 
 class TextDatasetTestCase(TestCase):
@@ -80,7 +87,6 @@ class TextDatasetTestCase(TestCase):
         fp = tempfile.NamedTemporaryFile()
         for x in lines:
             fp.write(f'{x}\n'.encode('utf-8'))
-        fp.seek(0)
 
         data = TextDataset(fp.name)
         for x, y in zip(data, lines):
