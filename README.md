@@ -9,11 +9,11 @@ You can manipulate any kind of iterable data. Heavily inspired by [tf.data](http
 
 **_pipelib.Dataset()_**
 
-　　　　A Dataset is a set of items which can be `dict`, `list`, or `tuple`. It implements `map`, `filter`, `flat_map` to manipulate items, and these methods are only evaluaed as needed (lazy evaluation). Lazy evaluation allows for more straightforward programming. Also it implements some eager evaluation methods to peek items.
+A Dataset is a set of items which can be `dict`, `list`, or `tuple`. It implements `map`, `filter`, `flat_map` to manipulate items, and these methods are only evaluaed as needed (lazy evaluation). Lazy evaluation allows for more straightforward programming. Also it implements some eager evaluation methods to peek items.
     
 **_pipelib.TextDataset()_**
 
-　　　　A TextDataset is a special class for handling a text file. It loads a text line by line. In other words, the items are each line of text.
+A TextDataset is a special class for handling a text file. It loads a text line by line. In other words, the items are each line of text.
   
 ## Usage
 
