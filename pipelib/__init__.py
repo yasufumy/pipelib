@@ -1,1 +1,1 @@
-from pipelib.core import Dataset, TextDataset, DirDataset
+from pipelib.core import Dataset, TextDataset, DirDataset, PipelinedDataset

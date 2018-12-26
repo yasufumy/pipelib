@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='pipelib',
-    version='0.1',
+    version='0.1.2',
     description='pipeline architecture data library',
     url='https://github.com/yasufumy/pipelib',
     author='Yasufumi Taniguchi',
@@ -17,7 +17,6 @@ setup(
     ],
     license='MIT',
     classifiers=[
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],

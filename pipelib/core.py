@@ -1,17 +1,21 @@
 from itertools import chain, islice
-from functools import wraps
 from pathlib import Path
+
+import pipelib
 
 
 class Dataset:
     def __init__(self, dataset):
-        if isinstance(dataset, Dataset):
+        if isinstance(dataset, pipelib.Dataset):
             self._dataset = dataset._dataset
         else:
             self._dataset = dataset
 
     def __iter__(self):
         yield from self._dataset
+
+    def apply(self, func):
+        return PipelinedDataset(self, func)
 
     def map(self, map_func):
         def f(dataset):
@@ -61,7 +65,7 @@ class _NestedFunc:
 class PipelinedDataset(Dataset):
 
     def __init__(self, dataset, func):
-        if not isinstance(dataset, PipelinedDataset):
+        if not isinstance(dataset, pipelib.PipelinedDataset):
             self._func = func
         else:
             self._func = _NestedFunc(dataset._func, func)
@@ -70,6 +74,18 @@ class PipelinedDataset(Dataset):
 
     def __iter__(self):
         yield from self._func(self._dataset)
+
+
+class _Repeated:
+    __slots__ = ['_generator', '_args', '_kwargs']
+
+    def __init__(self, generator, *args, **kwargs):
+        self._generator = generator
+        self._args = args
+        self._kwargs = kwargs
+
+    def __iter__(self):
+        return self._generator(*self._args, **self._kwargs)
 
 
 class TextDataset(Dataset):
@@ -82,9 +98,11 @@ class TextDataset(Dataset):
 
     @property
     def _dataset(self):
-        with self._filepath.open(encoding=self._encoding) as f:
-            for line in f:
-                yield line[:-1]
+        def g(filepath, encoding):
+            with filepath.open(encoding=encoding) as f:
+                for line in f:
+                    yield line.rstrip()
+        return _Repeated(g, filepath=self._filepath, encoding=self._encoding)
 
 
 class DirDataset(Dataset):
@@ -97,5 +115,7 @@ class DirDataset(Dataset):
 
     @property
     def _dataset(self):
-        for path in self._dirpath.glob(self._pattern):
-            yield str(path)
+        def g(dirpath, pattern):
+            for path in dirpath.glob(pattern):
+                yield str(path)
+        return _Repeated(g, dirpath=self._dirpath, pattern=self._pattern)
