@@ -4,25 +4,28 @@ from pathlib import Path
 
 
 class Dataset:
-    def __init__(self, data):
-        self._data = data
+    def __init__(self, dataset):
+        if isinstance(dataset, Dataset):
+            self._dataset = dataset._dataset
+        else:
+            self._dataset = dataset
 
     def __iter__(self):
-        yield from self._data
+        yield from self._dataset
 
     def map(self, map_func):
-        def f(data):
-            return map(map_func, data)
+        def f(dataset):
+            return map(map_func, dataset)
         return PipelinedDataset(self, f)
 
     def flat_map(self, flat_map_func):
-        def f(data):
-            return chain.from_iterable(map(flat_map_func, data))
+        def f(dataset):
+            return chain.from_iterable(map(flat_map_func, dataset))
         return PipelinedDataset(self, f)
 
     def filter(self, predicate):
-        def f(data):
-            return filter(predicate, data)
+        def f(dataset):
+            return filter(predicate, dataset)
         return PipelinedDataset(self, f)
 
     def collect(self):
@@ -35,63 +38,64 @@ class Dataset:
         return next(iter(self))
 
 
+class _NestedFunc:
+    __slots__ = ['_prev_func', '_func']
+
+    def __init__(self, prev_func, func):
+        self._prev_func = prev_func
+        self._func = func
+
+    def _flatten_func(self, func):
+        if isinstance(func, _NestedFunc):
+            yield from self._flatten_func(func._prev_func)
+            yield from self._flatten_func(func._func)
+        else:
+            yield func
+
+    def __call__(self, dataset):
+        for func in self._flatten_func(self):
+            dataset = func(dataset)
+        return dataset
+
+
 class PipelinedDataset(Dataset):
+
     def __init__(self, dataset, func):
         if not isinstance(dataset, PipelinedDataset):
             self._func = func
         else:
-            prev_func = dataset._func
+            self._func = _NestedFunc(dataset._func, func)
 
-            def nested_func(data):
-                return func(prev_func(data))
-
-            self._func = nested_func
-
-        self._data = dataset._data
+        super().__init__(dataset)
 
     def __iter__(self):
-        yield from self._func(self._data)
+        yield from self._func(self._dataset)
 
 
-class _Repeat:
-    def __init__(self, func, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        self._func = func
+class TextDataset(Dataset):
+    def __init__(self, filepath, encoding='utf-8'):
+        filepath = Path(filepath)
+        assert filepath.is_file()
 
-    def __iter__(self):
-        return self._func(*self._args, **self._kwargs)
+        self._filepath = filepath
+        self._encoding = encoding
 
-
-def _repeated(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        return _Repeat(func, *args, **kwargs)
-    return wrapper
-
-
-def text(filepath, encoding='utf-8'):
-    filepath = Path(filepath)
-
-    assert filepath.is_file()
-
-    @_repeated
-    def i():
-        with filepath.open(encoding=encoding) as f:
+    @property
+    def _dataset(self):
+        with self._filepath.open(encoding=self._encoding) as f:
             for line in f:
                 yield line[:-1]
 
-    return Dataset(i())
 
+class DirDataset(Dataset):
+    def __init__(self, dirpath, pattern='*'):
+        dirpath = Path(dirpath)
+        assert dirpath.is_dir()
 
-def directory(dirpath, pattern='*'):
-    dirpath = Path(dirpath)
+        self._dirpath = dirpath
+        self._pattern = pattern
 
-    assert dirpath.is_dir()
-
-    @_repeated
-    def i():
-        for path in dirpath.glob(pattern):
+    @property
+    def _dataset(self):
+        for path in self._dirpath.glob(self._pattern):
             yield str(path)
-
-    return Dataset(i())
