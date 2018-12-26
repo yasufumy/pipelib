@@ -5,17 +5,21 @@ except ImportError:
     from distuils.core import setup
 
 
-packages = [
-    'datalib'
-]
-
-
 setup(
-    name='datalib',
-    version='v0.1',
+    name='pipes',
+    version='0.1',
     description='pipeline architecture data library',
+    url='https://github.com/yasufumy/pipes',
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
-    packages=packages,
-    licence='MIT'
+    packages=[
+        'pipes'
+    ],
+    licence='MIT',
+    classifiers=[
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+    ],
+    tests_require=['pytest']
 )
