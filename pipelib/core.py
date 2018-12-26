@@ -1,5 +1,4 @@
 from itertools import chain, islice
-from functools import wraps
 from pathlib import Path
 
 
