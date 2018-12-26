@@ -1,16 +1,16 @@
-# pipes: simple pipeline architecture dataset library
+# pipelib: simple pipeline architecture dataset library
 
-datalib is a simple pipeline architecture dataset library.
+pipelib is a simple pipeline architecture dataset library.
 
 You can manipulate any kind of iterable data. Heavily inspired by [tf.data](https://www.tensorflow.org/api_docs/python/tf/data/Dataset), [pyspark.RDD](http://spark.apache.org/docs/2.1.0/api/python/pyspark.html#pyspark.RDD), [cgarciae/pypeln](https://github.com/cgarciae/pypeln), and [kennethreitz/tablib](https://github.com/kennethreitz/tablib)
 
 ## Overview
 
-**_pipes.Dataset()_**
+**_pipelib.Dataset()_**
 
 　　　　A Dataset is a set of items which can be `dict`, `list`, or `tuple`. It implements `map`, `filter`, `flat_map` to manipulate items, and these methods are only evaluaed as needed (lazy evaluation). Lazy evaluation allows for more straightforward programming. Also it implements some eager evaluation methods to peek items.
     
-**_pipes.TextDataset()_**
+**_pipelib.TextDataset()_**
 
 　　　　A TextDataset is a special class for handling a text file. It loads a text line by line. In other words, the items are each line of text.
   
@@ -19,7 +19,7 @@ You can manipulate any kind of iterable data. Heavily inspired by [tf.data](http
 Handle a simple and small data:
 
 ```py
-from pipes import Dataset
+from pipelib import Dataset
 
 data = Dataset(range(20))
 ```
@@ -71,7 +71,7 @@ $ wget https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.train.t
 Prepare a TextDataset:
 
 ```py
-from pipes import TextDataset
+from pipelib import TextDataset
 
 data = TextDataset('ptb.train.txt')
 ```
@@ -96,8 +96,8 @@ Split by space and drop the items which include more than 10 words:
 
 ## Installation
 
-To install datalib, simply:
+To install pipelib, simply:
 
 ```bash
-$ pip install pipes
+$ pip install pipelib
 ```
