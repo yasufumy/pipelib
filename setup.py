@@ -6,14 +6,14 @@ except ImportError:
 
 
 setup(
-    name='pipes',
+    name='pipelib',
     version='0.1',
     description='pipeline architecture data library',
-    url='https://github.com/yasufumy/pipes',
+    url='https://github.com/yasufumy/pipelib',
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
     packages=[
-        'pipes'
+        'pipelib'
     ],
     license='MIT',
     classifiers=[
