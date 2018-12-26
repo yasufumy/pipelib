@@ -1,7 +1,7 @@
 from unittest import TestCase
 import tempfile
 
-from datalib import Dataset, TextDataset, DirDataset
+from pipes import Dataset, TextDataset, DirDataset
 
 
 class DatasetTestCase(TestCase):
