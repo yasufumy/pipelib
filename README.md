@@ -1,4 +1,5 @@
 # pipelib: simple pipeline architecture dataset library
+[![Build Status](https://travis-ci.org/yasufumy/pipelib.svg?branch=master)](https://travis-ci.org/yasufumy/pipelib)
 
 pipelib is a simple pipeline architecture dataset library.
 
