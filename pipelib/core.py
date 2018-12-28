@@ -1,5 +1,6 @@
-from itertools import chain, islice
+import random
 from pathlib import Path
+from itertools import chain, islice, takewhile, count
 
 import pipelib
 
@@ -16,6 +17,29 @@ class Dataset:
 
     def apply(self, func):
         return PipelinedDataset(self, func)
+
+    def repeat(self):
+        def f(dataset):
+            while True:
+                yield from dataset
+        return PipelinedDataset(self, f)
+
+    def batch(self, batch_size):
+        def f(dataset):
+            iterable = iter(dataset)
+            yield from takewhile(
+                bool, (list(islice(iterable, batch_size)) for _ in count(0)))
+        return PipelinedDataset(self, f)
+
+    def shuffle(self, shuffle_size):
+        def f(dataset):
+            iterable = iter(dataset)
+            chunk = list(islice(iterable, shuffle_size))
+            while chunk:
+                random.shuffle(chunk)
+                yield from chunk
+                chunk = list(islice(iterable, shuffle_size))
+        return PipelinedDataset(self, f)
 
     def map(self, map_func):
         def f(dataset):

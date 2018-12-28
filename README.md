@@ -72,7 +72,7 @@ def square_only_even(dataset):
 
 ```py
 >>> data.apply(square_only_even).take(5)
-[0,  4,  16,  36,  64]
+[0, 4, 16, 36, 64]
 ```
 
 ## Text file
@@ -111,21 +111,21 @@ For a CSV file:
 
 ```py
 >>> CSV.map(lambda x: next(csv.reader([x]))).first()
-['Frank',  'Riley',  '10']
+['Frank', 'Riley', '10']
 ```
 
 For a TSV file:
 
 ```py
 >>> TSV.map(lambda x: next(csv.reader([x], delimiter='\t'))).first()
-['Frank',  'Riley',  '10']
+['Frank', 'Riley', '10']
 ```
 
 For a line-delimited JSON file:
 
 ```py
 >>> JSON.map(json.loads).first()
-{'first': 'Frank',  'last': 'Riley',  'age': 10}
+{'first': 'Frank', 'last': 'Riley', 'age': 10}
 ```
 
 ## Text Processing
@@ -229,6 +229,13 @@ def batch(dataset):
 ```py
 >>> data.apply(repeat).apply(shuffle).apply(batch).take(5)
 [[0, 1, 2], [3, 4, 3], [2, 0, 1], [4, 2, 3], [4, 0, 1]]
+```
+
+Sugar syntax for repeat, shuffle, batch:
+
+```py
+>>> data.repeat().shuffle(5).batch(3)
+[[4, 2, 1], [3, 0, 3], [2, 4, 0], [1, 1, 2], [0, 4, 3]]
 ```
 
 ## Installation
