@@ -35,7 +35,7 @@ Take a look at the first item:
 Take the whole item:
 
 ```py
->>> data.collect()
+>>> data.all()
 [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 ```
 
@@ -133,8 +133,6 @@ For a line-delimited JSON file:
 Prepare Penn Tree Bank:
 
 ```py
-from collections import Counter
-
 from pipelib import TextDataset
 
 data = TextDataset('ptb.train.txt')
@@ -154,6 +152,7 @@ Split by space and drop the items which include more than 10 words:
 Build vocabulary:
 
 ```py
+>>> from collections import Counter
 >>> data = data.map(lambda x: x.strip().split()).filter(lambda x: len(x) < 10)
 >>> words, _ = zip(*Counter(data.flat_map(lambda x: x)).most_common())
 >>> token_to_index = dict(zip(words, range(len(words))))
@@ -194,16 +193,16 @@ import random
 n = 5
 
 def shuffle(dataset):
-    batch = []
+    chunk = []
     for x in dataset:
-        batch.append(x)
-        if len(batch) >= n:
-            random.shuffle(batch)
-            yield from batch
-            batch = []
-    if batch:
-        random.shuffle(batch)
-        yield from batch
+        chunk.append(x)
+        if len(chunk) >= n:
+            random.shuffle(chunk)
+            yield from chunk
+            chunk = []
+    if chunk:
+        random.shuffle(chunk)
+        yield from chunk
 ```
 
 ```py
