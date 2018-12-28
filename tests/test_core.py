@@ -22,6 +22,32 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
+    def test_repeat(self):
+        data = self.data.repeat()
+        expected = list(self.base) * 3
+
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
+    def test_shuffle(self):
+        data = self.data.shuffle(100).all()
+        data.sort()
+        expected = list(self.base)
+
+        self.assertListEqual(data, expected)
+
+    def test_batch(self):
+        batch_size = 10
+        data = self.data.batch(batch_size)
+        for x in data:
+            self.assertEqual(len(x), batch_size)
+
+        from itertools import chain
+        batch_size = 16
+        data = self.data.batch(batch_size)
+        for x, y in zip(chain.from_iterable(data), self.base):
+            self.assertEqual(x, y)
+
     def test_map(self):
         def f(x):
             return x ** 2
