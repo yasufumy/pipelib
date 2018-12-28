@@ -32,8 +32,8 @@ class Dataset:
             return filter(predicate, dataset)
         return PipelinedDataset(self, f)
 
-    def collect(self):
-        return list(iter(self))
+    def all(self):
+        return list(self)
 
     def take(self, n):
         return list(islice(self, n))

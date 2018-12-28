@@ -61,8 +61,8 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
-    def test_collect(self):
-        data = self.data.collect()
+    def test_all(self):
+        data = self.data.all()
         expected = list(self.base)
 
         self.assertListEqual(data, expected)
