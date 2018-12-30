@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import patch, Mock
 import tempfile
 
 from pipelib import Dataset, TextDataset, DirDataset
@@ -105,6 +106,38 @@ class DatasetTestCase(TestCase):
         expected = list(self.base[:n])
 
         self.assertListEqual(data, expected)
+
+    @patch('pipelib.core.open')
+    @patch('pipelib.core.pickle.dump')
+    def test_save(self, pickle_dump_mock, open_mock):
+        enter_mock = Mock()
+        # mock file object
+        open_mock.return_value.__enter__.return_value = enter_mock
+
+        filepath = '/path/to/dataset'
+        data = self.data.filter(lambda x: x % 2 == 0) \
+            .map(lambda x: x ** 2) \
+            .save(filepath)
+        open_mock.assert_called_once_with(filepath, 'wb')
+        pickle_dump_mock.assert_called_once_with(
+            data.all(), enter_mock)
+
+        expected = [x ** 2 for x in self.base if x % 2 == 0]
+        self.assertListEqual(data.all(), expected)
+
+    @patch('pipelib.core.open')
+    @patch('pipelib.core.pickle.load')
+    def test_load(self, pickle_load_mock, open_mock):
+        pickle_load_mock.return_value = list(self.base)
+        enter_mock = Mock()
+        open_mock.return_value.__enter__.return_value = enter_mock
+
+        filepath = '/path/to/dataset'
+        data = Dataset.load(filepath)
+        open_mock.assert_called_once_with(filepath, 'rb')
+        pickle_load_mock.assert_called_once_with(enter_mock)
+
+        self.assertListEqual(data.all(), list(self.base))
 
 
 class TextDatasetTestCase(TestCase):
