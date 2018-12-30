@@ -108,8 +108,8 @@ class DatasetTestCase(TestCase):
         self.assertListEqual(data, expected)
 
     @patch('pipelib.core.open')
-    @patch('pipelib.core.pickle')
-    def test_save(self, pickle_mock, open_mock):
+    @patch('pipelib.core.pickle.dump')
+    def test_save(self, pickle_dump_mock, open_mock):
         enter_mock = Mock()
         # mock file object
         open_mock.return_value.__enter__.return_value = enter_mock
@@ -119,12 +119,11 @@ class DatasetTestCase(TestCase):
             .map(lambda x: x ** 2) \
             .save(filepath)
         open_mock.assert_called_once_with(filepath, 'wb')
-        pickle_mock.dump.assert_called_once_with(
+        pickle_dump_mock.assert_called_once_with(
             data.all(), enter_mock)
 
         expected = [x ** 2 for x in self.base if x % 2 == 0]
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.assertListEqual(data.all(), expected)
 
     @patch('pipelib.core.open')
     @patch('pipelib.core.pickle.load')
