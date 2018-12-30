@@ -47,9 +47,9 @@ class Dataset:
             return map(map_func, dataset)
         return PipelinedDataset(self, f)
 
-    def flat_map(self, flat_map_func):
+    def flat_map(self, map_func):
         def f(dataset):
-            return chain.from_iterable(map(flat_map_func, dataset))
+            return chain.from_iterable(map(map_func, dataset))
         return PipelinedDataset(self, f)
 
     def filter(self, predicate):
