@@ -126,6 +126,20 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
+    @patch('pipelib.core.open')
+    @patch('pipelib.core.pickle.load')
+    def test_load(self, pickle_load_mock, open_mock):
+        pickle_load_mock.return_value = list(self.base)
+        enter_mock = Mock()
+        open_mock.return_value.__enter__.return_value = enter_mock
+
+        filepath = '/path/to/dataset'
+        data = Dataset.load(filepath)
+        open_mock.assert_called_once_with(filepath, 'rb')
+        pickle_load_mock.assert_called_once_with(enter_mock)
+
+        self.assertListEqual(data.all(), list(self.base))
+
 
 class TextDatasetTestCase(TestCase):
     def test_text(self):
