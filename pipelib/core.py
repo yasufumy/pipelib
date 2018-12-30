@@ -1,4 +1,5 @@
 import random
+import pickle
 from pathlib import Path
 from itertools import chain, islice, takewhile, count
 
@@ -64,6 +65,18 @@ class Dataset:
 
     def first(self):
         return next(iter(self))
+
+    def save(self, filename):
+        evaluated_dataset = list(self)
+        with open(filename, 'wb') as f:
+            pickle.dump(evaluated_dataset, f)
+        return self
+
+    @staticmethod
+    def load(filename):
+        with open(filename, 'rb') as f:
+            dataset = pickle.load(f)
+        return Dataset(dataset)
 
 
 class _NestedFunc:
