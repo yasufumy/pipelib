@@ -2,6 +2,7 @@ from unittest import TestCase
 from unittest.mock import patch, Mock
 import tempfile
 
+import pipelib
 from pipelib import Dataset, TextDataset, DirDataset
 
 
@@ -80,6 +81,20 @@ class DatasetTestCase(TestCase):
 
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
+
+    def test_zip(self):
+        data1 = self.data.map(lambda x: x ** 2)
+        data2 = self.data.map(lambda x: x / 2)
+
+        data = data1.zip(data2)
+
+        for x, y in zip(data, self.base):
+            self.assertEqual(x[0], y ** 2)
+            self.assertEqual(x[1], y / 2)
+
+        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertEqual(data._dataset, self.base)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
     def test_method_chain(self):
         data = self.data.filter(lambda x: x % 2 == 0).map(lambda x: x ** 2)
