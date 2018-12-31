@@ -25,6 +25,8 @@ class FlatMapParallel(MapParallel):
 class FilterParallel(MapParallel):
 
     class _FilterTask:
+        __slots__ = ['_func']
+
         def __init__(self, func):
             self._func = func
 
