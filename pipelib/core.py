@@ -109,7 +109,7 @@ class _NestedFunc:
 class PipelinedDataset(Dataset):
 
     def __init__(self, dataset, func):
-        if not isinstance(dataset, pipelib.PipelinedDataset):
+        if not isinstance(dataset, pipelib.core.PipelinedDataset):
             self._func = func
         else:
             self._func = _NestedFunc(dataset._func, func)
