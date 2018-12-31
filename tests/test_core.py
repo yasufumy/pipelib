@@ -1,6 +1,7 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
 import tempfile
+from itertools import chain
 
 import pipelib
 from pipelib import Dataset, TextDataset, DirDataset
@@ -44,7 +45,6 @@ class DatasetTestCase(TestCase):
         for x in data:
             self.assertEqual(len(x), batch_size)
 
-        from itertools import chain
         batch_size = 16
         data = self.data.batch(batch_size)
         for x, y in zip(chain.from_iterable(data), self.base):
@@ -165,6 +165,17 @@ class TextDatasetTestCase(TestCase):
         data = TextDataset(fp.name)
         for x, y in zip(data, lines):
             self.assertEqual(x, y)
+
+        self.assertIsInstance(data._dataset, pipelib.core._Repeated)
+
+        data = data.map(str.split).filter(lambda x: True).flat_map(lambda x: x)
+
+        for x, y in zip(data, chain.from_iterable([l.split() for l in lines])):
+            self.assertEqual(x, y)
+
+        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertIsInstance(data._dataset, pipelib.core._Repeated)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
         fp.close()
 
