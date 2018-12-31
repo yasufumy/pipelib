@@ -57,6 +57,13 @@ class Dataset:
             return filter(predicate, dataset)
         return PipelinedDataset(self, f)
 
+    def zip(self, *others):
+        assert all(isinstance(other, pipelib.Dataset) for other in others)
+
+        def f(dataset):
+            yield from zip(dataset, *others)
+        return PipelinedDataset(self, f)
+
     def all(self):
         return list(self)
 
