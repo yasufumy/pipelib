@@ -97,11 +97,22 @@ class DatasetTestCase(TestCase):
         self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
     def test_method_chain(self):
-        data = self.data.filter(lambda x: x % 2 == 0).map(lambda x: x ** 2)
-        expected = [x ** 2 for x in self.base if x % 2 == 0]
+        data = self.data.map(lambda x: x ** 2) \
+            .filter(lambda x: x % 2 == 0) \
+            .flat_map(lambda x: [x, x]) \
+            .map(lambda x: x / 2) \
+            .filter(lambda x: x < 100) \
+            .flat_map(lambda x: [x, x, x])
 
-        for x, y in zip(data, expected):
+        expected = [x ** 2 for x in self.base if (x ** 2) % 2 == 0]
+        expected = [[x / 2] * 6 for x in expected if (x / 2) < 100]
+
+        for x, y in zip(data, chain.from_iterable(expected)):
             self.assertEqual(x, y)
+
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
+        self.assertEqual(data._dataset, self.base)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
     def test_all(self):
         data = self.data.all()
