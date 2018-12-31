@@ -86,32 +86,33 @@ class Dataset:
         return Dataset(dataset)
 
 
+class _NestedFunc:
+    __slots__ = ['_prev_func', '_func']
+
+    def __init__(self, prev_func, func):
+        self._prev_func = prev_func
+        self._func = func
+
+    def _flatten_func(self, func):
+        if isinstance(func, _NestedFunc):
+            yield from self._flatten_func(func._prev_func)
+            yield from self._flatten_func(func._func)
+        else:
+            yield func
+
+    def __call__(self, dataset):
+        for func in self._flatten_func(self):
+            dataset = func(dataset)
+        return dataset
+
+
 class PipelinedDataset(Dataset):
-
-    class _NestedFunc:
-        __slots__ = ['_prev_func', '_func']
-
-        def __init__(self, prev_func, func):
-            self._prev_func = prev_func
-            self._func = func
-
-        def _flatten_func(self, func):
-            if isinstance(func, self.__class__):
-                yield from self._flatten_func(func._prev_func)
-                yield from self._flatten_func(func._func)
-            else:
-                yield func
-
-        def __call__(self, dataset):
-            for func in self._flatten_func(self):
-                dataset = func(dataset)
-            return dataset
 
     def __init__(self, dataset, func):
         if not isinstance(dataset, pipelib.PipelinedDataset):
             self._func = func
         else:
-            self._func = self._NestedFunc(dataset._func, func)
+            self._func = _NestedFunc(dataset._func, func)
 
         super().__init__(dataset)
 
