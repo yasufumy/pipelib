@@ -6,12 +6,6 @@ from collections import Counter
 from pipelib import TextDataset
 
 
-def zip_datasets(*others):
-    def f(dataset):
-        yield from zip(dataset, *others)
-    return f
-
-
 def batch_transform(batch):
     if isinstance(batch[0], tuple):
         # transpose
@@ -45,6 +39,7 @@ def prepare_data(source_file, cache_file):
 
 def do_something(batch):
     time.sleep(0.1)
+    assert len(batch[0]) == len(batch[1])
     print(f'en batch: {len(batch[0])}', f'ja batch: {len(batch[1])}')
 
 
@@ -62,7 +57,7 @@ if __name__ == '__main__':
     epoch = 5
     batch_size = 64
     shuffle_size = 500
-    en_ja = en.apply(zip_datasets(ja)) \
+    en_ja = en.zip(ja) \
         .shuffle(shuffle_size) \
         .batch(batch_size) \
         .map(batch_transform)
