@@ -92,7 +92,7 @@ class DatasetTestCase(TestCase):
             self.assertEqual(x[0], y ** 2)
             self.assertEqual(x[1], y / 2)
 
-        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertEqual(data._dataset, self.base)
         self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
@@ -173,7 +173,7 @@ class TextDatasetTestCase(TestCase):
         for x, y in zip(data, chain.from_iterable([l.split() for l in lines])):
             self.assertEqual(x, y)
 
-        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertIsInstance(data._dataset, pipelib.core._Repeated)
         self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
@@ -199,7 +199,7 @@ class DirDatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y.title())
 
-        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertIsInstance(data._dataset, pipelib.core._Repeated)
         self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
