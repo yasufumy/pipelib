@@ -1,43 +1,32 @@
 import os
 import time
-import multiprocessing
+try:
+    from joblib import Parallel, delayed
+except ModuleNotFoundError:
+    print('please install joblib.')
 from itertools import chain
 
 
 class MapParallel:
-    def __init__(self, func, n=None, chunksize=1):
+    def __init__(self, func, n=-1, chunksize=1):
         self._func = func
         self._n = n
         self._chunksize = chunksize
 
     def __call__(self, dataset):
-        with multiprocessing.Pool(self._n) as p:
-            yield from p.imap_unordered(self._func, dataset, self._chunksize)
+        yield from Parallel(n_jobs=self._n)(delayed(self._func)(x) for x in dataset)
 
 
 class FlatMapParallel(MapParallel):
     def __call__(self, dataset):
-        with multiprocessing.Pool(self._n) as p:
-            yield from chain.from_iterable(
-                p.imap_unordered(self._func, dataset, self._chunksize))
+        yield from chain.from_iterable(
+            Parallel(n_jobs=self._n)(delayed(self._func)(x) for x in dataset))
 
 
 class FilterParallel(MapParallel):
-
-    class _FilterTask:
-        __slots__ = ['_func']
-
-        def __init__(self, func):
-            self._func = func
-
-        def __call__(self, x):
-            return x, self._func(x)
-
     def __call__(self, dataset):
-        task = self._FilterTask(self._func)
-        with multiprocessing.Pool(self._n) as p:
-            yield from (
-                x for x, keep in p.imap_unordered(task, dataset, self._chunksize) if keep)
+        yield from (x for x, keep in Parallel(n_jobs=self._n)(
+            delayed(lambda x: (x, self._func(x)))(x) for x in dataset) if keep)
 
 
 def slow_map(x):
