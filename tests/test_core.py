@@ -190,4 +190,17 @@ class DirDatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
+        self.assertIsInstance(data._dataset, pipelib.core._Repeated)
+
+        data = data.map(lambda x: x.title()) \
+            .filter(lambda x: True)\
+            .flat_map(lambda x: [x])
+
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y.title())
+
+        self.assertIsInstance(data, pipelib.PipelinedDataset)
+        self.assertIsInstance(data._dataset, pipelib.core._Repeated)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+
         tempdir.cleanup()
