@@ -27,19 +27,19 @@ class Dataset:
 
     def batch(self, batch_size):
         def f(dataset):
-            iterable = iter(dataset)
+            iterator = iter(dataset)
             yield from takewhile(
-                bool, (list(islice(iterable, batch_size)) for _ in count(0)))
+                bool, (list(islice(iterator, batch_size)) for _ in count(0)))
         return PipelinedDataset(self, f)
 
     def shuffle(self, shuffle_size):
         def f(dataset):
-            iterable = iter(dataset)
-            chunk = list(islice(iterable, shuffle_size))
+            iterator = iter(dataset)
+            chunk = list(islice(iterator, shuffle_size))
             while chunk:
                 random.shuffle(chunk)
                 yield from chunk
-                chunk = list(islice(iterable, shuffle_size))
+                chunk = list(islice(iterator, shuffle_size))
         return PipelinedDataset(self, f)
 
     def map(self, map_func):
@@ -62,6 +62,13 @@ class Dataset:
 
         def f(dataset):
             yield from zip(dataset, *others)
+        return PipelinedDataset(self, f)
+
+    def concatenate(self, *others):
+        assert all(isinstance(other, pipelib.Dataset) for other in others)
+
+        def f(dataset):
+            yield from chain(dataset, *others)
         return PipelinedDataset(self, f)
 
     def all(self):

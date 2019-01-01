@@ -96,6 +96,20 @@ class DatasetTestCase(TestCase):
         self.assertEqual(data._dataset, self.base)
         self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
+    def test_concatenate(self):
+        data1 = self.data.map(lambda x: x ** 2)
+        data2 = self.data.map(lambda x: x / 2)
+
+        data = data1.concatenate(data2)
+        expected = [x ** 2 for x in self.base] + [x / 2 for x in self.base]
+
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
+        self.assertEqual(data._dataset, self.base)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+
     def test_method_chain(self):
         data = self.data.map(lambda x: x ** 2) \
             .filter(lambda x: x % 2 == 0) \
