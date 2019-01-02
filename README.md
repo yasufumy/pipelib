@@ -75,6 +75,22 @@ def square_only_even(dataset):
 [0, 4, 16, 36, 64]
 ```
 
+Zip datasets:
+
+```py
+>>> other = Dataset(range(20)).map(lambda x: x * 2)
+>>> data.map(lambda x: x / 2).zip(other).take(5)
+[(0.0, 0), (0.5, 2), (1.0, 4), (1.5, 6), (2.0, 8)]
+```
+
+Concatenate datasets:
+
+```py
+>>> other = Dataset(range(3)).map(lambda x: 1 + x ** 2)
+>>> other.concatenate(data).take(5)
+[1, 2, 5, 0, 1]
+```
+
 ## Text Processing
 
 First of all, download Penn Tree Bank dataset:
