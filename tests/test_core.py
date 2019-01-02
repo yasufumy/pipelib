@@ -209,12 +209,17 @@ class TextDatasetTestCase(TestCase):
 class DirDatasetTestCase(TestCase):
     def test_directory(self):
         tempdir = tempfile.TemporaryDirectory()
-        expected = [tempfile.NamedTemporaryFile(dir=tempdir.name).name
-                    for _ in range(2)]
+        from pathlib import Path
+        expected = []
+        dirpath = Path(tempdir.name)
+        for i in range(10):
+            filename = f'{i:03d}.txt'
+            (dirpath / filename).touch()
+            expected.append(filename)
 
-        data = DirDataset(tempdir.name)
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        data = DirDataset(tempdir.name, pattern='*.txt')
+        for x, y in zip(sorted(data.all()), expected):
+            self.assertEqual(x, f'{tempdir.name}/{y}')
 
         self.assertIsInstance(data._dataset, pipelib.core._Repeated)
 
@@ -222,8 +227,8 @@ class DirDatasetTestCase(TestCase):
             .filter(lambda x: True)\
             .flat_map(lambda x: [x])
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y.title())
+        for x, y in zip(sorted(data.all()), expected):
+            self.assertEqual(x, f'{tempdir.name}/{y}'.title())
 
         self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertIsInstance(data._dataset, pipelib.core._Repeated)
