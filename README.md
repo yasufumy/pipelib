@@ -75,62 +75,15 @@ def square_only_even(dataset):
 [0, 4, 16, 36, 64]
 ```
 
-## Text file
-
-Download sample files:
-
-```bash
-$ wget https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.train.txt
-$ wget https://gist.githubusercontent.com/yasufumy/e4868a7ab91d20cd3be2e3669b6189cd/raw/553320aeae11221c90a3963c0e0855bceb0184f1/sample.csv
-$ wget https://gist.githubusercontent.com/yasufumy/d5231ca019720bb17e80999d5b6e1408/raw/c811aaee38a039ad2ea089814a0b5c63a7abbe12/sample.tsv
-$ wget https://gist.githubusercontent.com/yasufumy/f837b0a7047ff4736444c649f85c82dd/raw/2b63139431298ae9cf9fb2363bfe8afc9f4afd04/sample.json
-```
-
-Prepare a TextDataset:
-
-```py
-import json
-import csv
-
-from pipelib import TextDataset
-
-TXT = TextDataset('ptb.train.txt')
-CSV = TextDataset('sample.csv')
-TSV = TextDataset('sample.tsv')
-JSON = TextDataset('sample.json')
-```
-
-Take a look at the first line:
-
-```py
->>> TXT.first()
-' aer banknote berlitz calloway centrust cluett fromstein gitano guterman hydro-quebec ipo kia memotec mlx nahb punts rake regatta rubens sim snack-food ssangyong swapo wachter '
-```
-
-For a CSV file:
-
-```py
->>> CSV.map(lambda x: next(csv.reader([x]))).first()
-['Frank', 'Riley', '10']
-```
-
-For a TSV file:
-
-```py
->>> TSV.map(lambda x: next(csv.reader([x], delimiter='\t'))).first()
-['Frank', 'Riley', '10']
-```
-
-For a line-delimited JSON file:
-
-```py
->>> JSON.map(json.loads).first()
-{'first': 'Frank', 'last': 'Riley', 'age': 10}
-```
-
 ## Text Processing
 
-Prepare Penn Tree Bank:
+First of all, download Penn Tree Bank dataset:
+
+```bash
+$ curl -sO https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.train.txt
+```
+
+Load Penn Tree Bank dataset:
 
 ```py
 from pipelib import TextDataset
