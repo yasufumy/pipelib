@@ -186,6 +186,7 @@ class TextDatasetTestCase(TestCase):
         fp = tempfile.NamedTemporaryFile()
         for x in lines:
             fp.write(f'{x}\n'.encode('utf-8'))
+        fp.seek(0)
 
         data = TextDataset(fp.name)
         for x, y in zip(data, lines):
