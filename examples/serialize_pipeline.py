@@ -2,28 +2,14 @@ import os
 import os.path as osp
 from collections import Counter
 
-try:
-    import cloudpickle
-except ModuleNotFoundError:
-    print('please install cloudpickle')
-
 from pipelib import TextDataset
+from pipelib.serializers import save_pipeline, load_pipeline
 
 
 def build_vocab(tokens):
     counter = Counter(tokens)
     words, _ = zip(*counter.most_common())
     return dict(zip(words, range(len(words))))
-
-
-def save(target, filepath):
-    with open(filepath, 'wb') as f:
-        cloudpickle.dump(target, f)
-
-
-def load(filepath):
-    with open(filepath, 'rb') as f:
-        return cloudpickle.load(f)
 
 
 if __name__ == '__main__':
@@ -44,9 +30,9 @@ if __name__ == '__main__':
     print(en_train.take(3))
 
     # save and load pipelines applied to training data
-    save(en_train._func, 'pipelines')
-    pipelines = load('pipelines')
+    save_pipeline('pipeline', en_train)
+    pipeline = load_pipeline('pipeline')
 
     # apply pipelines to test data
-    en_test = en_test.apply(pipelines)
+    en_test = en_test.apply(pipeline)
     print(en_test.take(3))
