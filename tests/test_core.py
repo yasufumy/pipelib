@@ -164,6 +164,9 @@ class DatasetTestCase(TestCase):
 
         expected = [x ** 2 for x in self.base if x % 2 == 0]
         self.assertListEqual(data.all(), expected)
+        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
+        self.assertEqual(data._dataset, self.base)
+        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
 
     @patch('pipelib.core.open')
     @patch('pipelib.core.pickle.load')
@@ -178,6 +181,7 @@ class DatasetTestCase(TestCase):
         pickle_load_mock.assert_called_once_with(enter_mock)
 
         self.assertListEqual(data.all(), list(self.base))
+        self.assertEqual(data._dataset, list(self.base))
 
 
 class TextDatasetTestCase(TestCase):
