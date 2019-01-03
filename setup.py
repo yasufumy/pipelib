@@ -22,5 +22,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    tests_require=['pytest']
+    tests_require=['pytest'],
+    install_requires=['cloudpickle']
 )
