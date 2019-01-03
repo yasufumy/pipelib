@@ -13,6 +13,10 @@ class DatasetTestCase(TestCase):
         self.base = range(100)
         self.data = Dataset(self.base)
 
+    def check_for_loop(self, data, expected):
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
     def test_apply(self):
         def f(dataset):
             for x in dataset:
@@ -22,15 +26,13 @@ class DatasetTestCase(TestCase):
         data = self.data.apply(f)
         expected = f(self.base)
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, expected)
 
     def test_repeat(self):
         data = self.data.repeat()
         expected = list(self.base) * 3
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, expected)
 
     def test_shuffle(self):
         data = self.data.shuffle(100).all()
@@ -47,8 +49,7 @@ class DatasetTestCase(TestCase):
 
         batch_size = 16
         data = self.data.batch(batch_size)
-        for x, y in zip(chain.from_iterable(data), self.base):
-            self.assertEqual(x, y)
+        self.check_for_loop(chain.from_iterable(data), self.base)
 
     def test_map(self):
         def f(x):
@@ -66,8 +67,7 @@ class DatasetTestCase(TestCase):
         data = self.data.filter(f)
         expected = [y for y in self.base if f(y)]
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, expected)
 
     def test_flat_map(self):
         repeat = 3
@@ -79,8 +79,7 @@ class DatasetTestCase(TestCase):
 
         expected = [x for x in self.base for _ in range(repeat)]
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, expected)
 
     def test_zip(self):
         data1 = self.data.map(lambda x: x ** 2)
@@ -103,8 +102,7 @@ class DatasetTestCase(TestCase):
         data = data1.concatenate(data2)
         expected = [x ** 2 for x in self.base] + [x / 2 for x in self.base]
 
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, expected)
 
         self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertEqual(data._dataset, self.base)
@@ -121,8 +119,7 @@ class DatasetTestCase(TestCase):
         expected = [x ** 2 for x in self.base if (x ** 2) % 2 == 0]
         expected = [[x / 2] * 6 for x in expected if (x / 2) < 100]
 
-        for x, y in zip(data, chain.from_iterable(expected)):
-            self.assertEqual(x, y)
+        self.check_for_loop(data, chain.from_iterable(expected))
 
         self.assertIsInstance(data, pipelib.core.PipelinedDataset)
         self.assertEqual(data._dataset, self.base)
