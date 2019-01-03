@@ -17,6 +17,12 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, expected):
             self.assertEqual(x, y)
 
+    def check_correct_pipelined_dataset(self, dataset, data, nested=True):
+        self.assertIsInstance(dataset, pipelib.core.PipelinedDataset)
+        self.assertEqual(dataset._dataset, data)
+        if nested:
+            self.assertIsInstance(dataset._func, pipelib.core._NestedFunc)
+
     def test_apply(self):
         def f(dataset):
             for x in dataset:
@@ -27,19 +33,21 @@ class DatasetTestCase(TestCase):
         expected = f(self.base)
 
         self.check_for_loop(data, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_repeat(self):
         data = self.data.repeat()
         expected = list(self.base) * 3
 
         self.check_for_loop(data, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_shuffle(self):
-        data = self.data.shuffle(100).all()
-        data.sort()
+        data = self.data.shuffle(100)
         expected = list(self.base)
 
-        self.assertListEqual(data, expected)
+        self.assertListEqual(sorted(data), expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_batch(self):
         batch_size = 10
@@ -50,6 +58,7 @@ class DatasetTestCase(TestCase):
         batch_size = 16
         data = self.data.batch(batch_size)
         self.check_for_loop(chain.from_iterable(data), self.base)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_map(self):
         def f(x):
@@ -60,6 +69,8 @@ class DatasetTestCase(TestCase):
         for x, y in zip(data, self.base):
             self.assertEqual(x, f(y))
 
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
+
     def test_filter(self):
         def f(x):
             return x % 2 == 0
@@ -68,6 +79,7 @@ class DatasetTestCase(TestCase):
         expected = [y for y in self.base if f(y)]
 
         self.check_for_loop(data, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_flat_map(self):
         repeat = 3
@@ -80,6 +92,7 @@ class DatasetTestCase(TestCase):
         expected = [x for x in self.base for _ in range(repeat)]
 
         self.check_for_loop(data, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
     def test_zip(self):
         data1 = self.data.map(lambda x: x ** 2)
@@ -91,9 +104,7 @@ class DatasetTestCase(TestCase):
             self.assertEqual(x[0], y ** 2)
             self.assertEqual(x[1], y / 2)
 
-        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
-        self.assertEqual(data._dataset, self.base)
-        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+        self.check_correct_pipelined_dataset(data, self.base)
 
     def test_concatenate(self):
         data1 = self.data.map(lambda x: x ** 2)
@@ -104,9 +115,7 @@ class DatasetTestCase(TestCase):
 
         self.check_for_loop(data, expected)
 
-        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
-        self.assertEqual(data._dataset, self.base)
-        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+        self.check_correct_pipelined_dataset(data, self.base)
 
     def test_method_chain(self):
         data = self.data.map(lambda x: x ** 2) \
@@ -120,16 +129,13 @@ class DatasetTestCase(TestCase):
         expected = [[x / 2] * 6 for x in expected if (x / 2) < 100]
 
         self.check_for_loop(data, chain.from_iterable(expected))
-
-        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
-        self.assertEqual(data._dataset, self.base)
-        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+        self.check_correct_pipelined_dataset(data, self.base)
 
     def test_all(self):
-        data = self.data.all()
+        data = self.data
         expected = list(self.base)
 
-        self.assertListEqual(data, expected)
+        self.assertListEqual(data.all(), expected)
 
     def test_first(self):
         data = self.data.first()
@@ -161,9 +167,7 @@ class DatasetTestCase(TestCase):
 
         expected = [x ** 2 for x in self.base if x % 2 == 0]
         self.assertListEqual(data.all(), expected)
-        self.assertIsInstance(data, pipelib.core.PipelinedDataset)
-        self.assertEqual(data._dataset, self.base)
-        self.assertIsInstance(data._func, pipelib.core._NestedFunc)
+        self.check_correct_pipelined_dataset(data, self.base)
 
     @patch('pipelib.core.open')
     @patch('pipelib.core.pickle.load')
