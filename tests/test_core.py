@@ -106,11 +106,11 @@ class DatasetTestCase(TestCase):
 
         self.check_correct_pipelined_dataset(data, self.base)
 
-    def test_concatenate(self):
+    def test_concat(self):
         data1 = self.data.map(lambda x: x ** 2)
         data2 = self.data.map(lambda x: x / 2)
 
-        data = data1.concatenate(data2)
+        data = data1.concat(data2)
         expected = [x ** 2 for x in self.base] + [x / 2 for x in self.base]
 
         self.check_for_loop(data, expected)
