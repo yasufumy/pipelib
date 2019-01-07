@@ -23,7 +23,7 @@ if __name__ == '__main__':
     en_test = TextDataset('test.en')
 
     # build vocabulary
-    token_to_index = build_vocab(en_train.concatenate(en_test).map(str.split).flat_map(lambda x: x))
+    token_to_index = build_vocab(en_train.concat(en_test).map(str.split).flat_map(lambda x: x))
 
     # process training data
     en_train = en_train.map(str.split).map(lambda x: [token_to_index[token] for token in x])
