@@ -64,7 +64,7 @@ class Dataset:
             yield from zip(dataset, *others)
         return PipelinedDataset(self, f)
 
-    def concatenate(self, *others):
+    def concat(self, *others):
         assert all(isinstance(other, pipelib.Dataset) for other in others)
 
         def f(dataset):
