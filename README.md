@@ -87,7 +87,7 @@ Concatenate datasets:
 
 ```py
 >>> other = Dataset(range(3)).map(lambda x: 1 + x ** 2)
->>> other.concatenate(data).take(5)
+>>> other.concat(data).take(5)
 [1, 2, 5, 0, 1]
 ```
 
