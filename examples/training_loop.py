@@ -6,9 +6,8 @@ from collections import Counter
 from pipelib import TextDataset
 
 
-def batch_transform(batch):
+def batch_transpose(batch):
     if isinstance(batch[0], tuple):
-        # transpose
         batch = [x for x in zip(*batch)]
     return batch
 
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     en_ja = en.zip(ja) \
         .shuffle(shuffle_size) \
         .batch(batch_size) \
-        .map(batch_transform)
+        .map(batch_transpose)
 
     print('start training')
     for _ in range(epoch):
