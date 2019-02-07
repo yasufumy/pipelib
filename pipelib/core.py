@@ -1,7 +1,8 @@
 import random
 import pickle
 from pathlib import Path
-from itertools import chain, islice
+from itertools import chain, islice, tee
+from collections import deque
 
 import pipelib
 
@@ -37,6 +38,12 @@ class Dataset:
             for chunk in iter(lambda: list(islice(iterator, shuffle_size)), []):
                 random.shuffle(chunk)
                 yield from chunk
+        return PipelinedDataset(self, f)
+
+    def window(self, window_size):
+        def f(dataset):
+            yield from zip(*(deque(islice(it, i), 0) or it
+                           for i, it in enumerate(tee(dataset, window_size))))
         return PipelinedDataset(self, f)
 
     def map(self, map_func):

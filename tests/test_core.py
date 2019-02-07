@@ -60,6 +60,16 @@ class DatasetTestCase(TestCase):
         self.check_for_loop(chain.from_iterable(data), self.base)
         self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
+    def test_window(self):
+        window_size = 3
+        data = self.data.window(window_size)
+        for x in data:
+            self.assertEqual(len(x), window_size)
+
+        expected = zip(*(self.base[i:] for i in range(window_size)))
+        self.check_for_loop(data, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
+
     def test_map(self):
         def f(x):
             return x ** 2
