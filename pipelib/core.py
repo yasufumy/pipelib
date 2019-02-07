@@ -1,7 +1,7 @@
 import random
 import pickle
 from pathlib import Path
-from itertools import chain, islice, takewhile, count
+from itertools import chain, islice
 
 import pipelib
 
@@ -28,18 +28,15 @@ class Dataset:
     def batch(self, batch_size):
         def f(dataset):
             iterator = iter(dataset)
-            yield from takewhile(
-                bool, (list(islice(iterator, batch_size)) for _ in count(0)))
+            yield from iter(lambda: list(islice(iterator, batch_size)), [])
         return PipelinedDataset(self, f)
 
     def shuffle(self, shuffle_size):
         def f(dataset):
             iterator = iter(dataset)
-            chunk = list(islice(iterator, shuffle_size))
-            while chunk:
+            for chunk in iter(lambda: list(islice(iterator, shuffle_size)), []):
                 random.shuffle(chunk)
                 yield from chunk
-                chunk = list(islice(iterator, shuffle_size))
         return PipelinedDataset(self, f)
 
     def map(self, map_func):

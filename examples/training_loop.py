@@ -6,9 +6,8 @@ from collections import Counter
 from pipelib import TextDataset
 
 
-def batch_transform(batch):
+def batch_transpose(batch):
     if isinstance(batch[0], tuple):
-        # transpose
         batch = [x for x in zip(*batch)]
     return batch
 
@@ -46,9 +45,9 @@ def do_something(batch):
 if __name__ == '__main__':
 
     # data preparation
-    if not osp.exists('train.en'):
+    if not osp.exists('test.en'):
         os.system('curl -sO https://raw.githubusercontent.com/odashi/small_parallel_enja/master/test.en')
-    if not osp.exists('train.ja'):
+    if not osp.exists('test.ja'):
         os.system('curl -sO https://raw.githubusercontent.com/odashi/small_parallel_enja/master/test.ja')
 
     en = prepare_data('test.en', 'en.processed')
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     en_ja = en.zip(ja) \
         .shuffle(shuffle_size) \
         .batch(batch_size) \
-        .map(batch_transform)
+        .map(batch_transpose)
 
     print('start training')
     for _ in range(epoch):
