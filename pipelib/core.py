@@ -35,11 +35,9 @@ class Dataset:
     def shuffle(self, shuffle_size):
         def f(dataset):
             iterator = iter(dataset)
-            chunk = list(islice(iterator, shuffle_size))
-            while chunk:
+            for chunk in iter(lambda: list(islice(iterator, shuffle_size)), []):
                 random.shuffle(chunk)
                 yield from chunk
-                chunk = list(islice(iterator, shuffle_size))
         return PipelinedDataset(self, f)
 
     def map(self, map_func):
