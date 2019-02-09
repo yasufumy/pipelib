@@ -5,6 +5,7 @@ from itertools import chain, islice, tee
 from collections import deque
 
 import pipelib
+from pipelib import parallel
 
 
 class Dataset:
@@ -43,7 +44,7 @@ class Dataset:
     def window(self, window_size):
         def f(dataset):
             yield from zip(*(deque(islice(it, i), 0) or it
-                           for i, it in enumerate(tee(dataset, window_size))))
+                             for i, it in enumerate(tee(dataset, window_size))))
         return PipelinedDataset(self, f)
 
     def map(self, map_func):
@@ -74,6 +75,18 @@ class Dataset:
         def f(dataset):
             yield from chain(dataset, *others)
         return PipelinedDataset(self, f)
+
+    def map_parallel(self, map_func, n=None, chunksize=1):
+        return PipelinedDataset(
+            self, parallel.MapParallel(map_func, n, chunksize))
+
+    def flat_map_parallel(self, map_func, n=None, chunksize=1):
+        return PipelinedDataset(
+            self, parallel.FlatMapParallel(map_func, n, chunksize))
+
+    def filter_parallel(self, predicate, n=None, chunksize=1):
+        return PipelinedDataset(
+            self, parallel.FilterParallel(predicate, n, chunksize))
 
     def all(self):
         return list(self)
