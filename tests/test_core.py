@@ -179,6 +179,11 @@ class DatasetTestCase(TestCase):
         self.check_for_loop(data, chain.from_iterable(expected))
         self.check_correct_pipelined_dataset(data, self.base)
 
+    def test_get_prefetch_iterator(self):
+        it = self.data.get_prefetch_iterator(n_prefetch=5)
+        for x, y in zip(it, self.base):
+            self.assertEqual(x, y)
+
     def test_all(self):
         data = self.data
         expected = list(self.base)
