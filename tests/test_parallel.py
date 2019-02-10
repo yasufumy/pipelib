@@ -1,0 +1,27 @@
+from unittest import TestCase
+
+from pipelib import parallel
+
+
+class ParallelTestCase(TestCase):
+
+    def setUp(self):
+        self.data = range(100)
+
+    def test_map_parallel(self):
+        result = list(parallel.MapParallel(lambda x: x ** 2)(self.data))
+        result.sort()
+        expected = [x ** 2 for x in self.data]
+        self.assertListEqual(result, expected)
+
+    def test_filter_parallel(self):
+        result = list(parallel.FilterParallel(lambda x: x % 2 == 0)(self.data))
+        result.sort()
+        expected = [x for x in self.data if x % 2 == 0]
+        self.assertListEqual(result, expected)
+
+    def test_flat_map_parallel(self):
+        result = list(parallel.FlatMapParallel(lambda x: [x])(self.data))
+        result.sort()
+        expected = [x for x in self.data]
+        self.assertListEqual(result, expected)
