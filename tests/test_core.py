@@ -104,6 +104,44 @@ class DatasetTestCase(TestCase):
         self.check_for_loop(data, expected)
         self.check_correct_pipelined_dataset(data, self.base, nested=False)
 
+    def test_map_parallel(self):
+        def f(x):
+            return x ** 2
+
+        data = self.data.map_parallel(f)
+        result = [x for x in data]
+        result.sort()
+        expected = [f(x) for x in self.base]
+
+        self.assertListEqual(result, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
+
+    def test_filter_parallel(self):
+        def f(x):
+            return x % 2 == 0
+
+        data = self.data.filter_parallel(f)
+        result = [x for x in data]
+        result.sort()
+        expected = [y for y in self.base if f(y)]
+
+        self.assertListEqual(result, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
+
+    def test_flat_map_parallel(self):
+        repeat = 3
+
+        def f(x):
+            return [x for _ in range(repeat)]
+
+        data = self.data.flat_map_parallel(f)
+        result = [x for x in data]
+        result.sort()
+        expected = [i for x in self.base for i in f(x)]
+
+        self.assertListEqual(result, expected)
+        self.check_correct_pipelined_dataset(data, self.base, nested=False)
+
     def test_zip(self):
         data1 = self.data.map(lambda x: x ** 2)
         data2 = self.data.map(lambda x: x / 2)
