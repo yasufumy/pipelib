@@ -15,9 +15,14 @@ class ParallelTestCase(TestCase):
         self.assertListEqual(result, expected)
 
     def test_filter_parallel(self):
-        result = list(parallel.FilterParallel(lambda x: x % 2 == 0)(self.data))
+        def predicate(x):
+            return x % 2 == 0
+
+        result = list(parallel.FilterParallel(predicate)(self.data))
         result.sort()
-        expected = [x for x in self.data if x % 2 == 0]
+        task = parallel.FilterParallel._FilterTask(predicate)
+        expected = [task(x) for x in self.data]
+        expected = [x[0] for x in expected if x[1]]
         self.assertListEqual(result, expected)
 
     def test_flat_map_parallel(self):

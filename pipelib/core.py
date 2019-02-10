@@ -6,6 +6,7 @@ from collections import deque
 
 import pipelib
 from pipelib import parallel
+from pipelib import iterators
 
 
 class Dataset:
@@ -17,6 +18,9 @@ class Dataset:
 
     def __iter__(self):
         yield from self._dataset
+
+    def get_prefetch_iterator(self, n_prefetch=1):
+        return iterators.PrefetchIterator(self, n_prefetch)
 
     def apply(self, func):
         return PipelinedDataset(self, func)
