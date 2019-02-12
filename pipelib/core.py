@@ -80,17 +80,17 @@ class Dataset:
             yield from chain(dataset, *others)
         return PipelinedDataset(self, f)
 
-    def map_parallel(self, map_func, n=None, chunksize=1):
+    def map_parallel(self, map_func, n=None, chunksize=1, unordered=False):
         return PipelinedDataset(
-            self, parallel.MapParallel(map_func, n, chunksize))
+            self, parallel.MapParallel(map_func, n, chunksize, unordered))
 
-    def flat_map_parallel(self, map_func, n=None, chunksize=1):
+    def flat_map_parallel(self, map_func, n=None, chunksize=1, unordered=False):
         return PipelinedDataset(
-            self, parallel.FlatMapParallel(map_func, n, chunksize))
+            self, parallel.FlatMapParallel(map_func, n, chunksize, unordered))
 
-    def filter_parallel(self, predicate, n=None, chunksize=1):
+    def filter_parallel(self, predicate, n=None, chunksize=1, unordered=False):
         return PipelinedDataset(
-            self, parallel.FilterParallel(predicate, n, chunksize))
+            self, parallel.FilterParallel(predicate, n, chunksize, unordered))
 
     def all(self):
         return list(self)
