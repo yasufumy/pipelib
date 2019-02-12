@@ -4,21 +4,27 @@ import multiprocess
 
 
 class MapParallel:
-    def __init__(self, func, n=None, chunksize=1):
+    def __init__(self, func, n=None, chunksize=1, unordered=False):
         self._func = func
         self._n = n
         self._chunksize = chunksize
+        if not unordered:
+            self._map_method = 'imap'
+        else:
+            self._map_method = 'imap_unordered'
 
     def __call__(self, dataset):
         with multiprocess.Pool(self._n) as p:
-            yield from p.imap_unordered(self._func, dataset, self._chunksize)
+            yield from getattr(p, self._map_method)(
+                self._func, dataset, self._chunksize)
 
 
 class FlatMapParallel(MapParallel):
     def __call__(self, dataset):
         with multiprocess.Pool(self._n) as p:
             yield from chain.from_iterable(
-                p.imap_unordered(self._func, dataset, self._chunksize))
+                getattr(p, self._map_method)(
+                    self._func, dataset, self._chunksize))
 
 
 class FilterParallel(MapParallel):
@@ -37,4 +43,5 @@ class FilterParallel(MapParallel):
 
         with multiprocess.Pool(self._n) as p:
             yield from (x for x, keep in
-                        p.imap_unordered(task, dataset, self._chunksize) if keep)
+                        getattr(p, self._map_method)(
+                            task, dataset, self._chunksize) if keep)
