@@ -4,14 +4,13 @@ from pathlib import Path
 from itertools import chain, islice, tee
 from collections import deque
 
-import pipelib
 from pipelib import parallel
 from pipelib import iterators
 
 
 class Dataset:
     def __init__(self, dataset):
-        if isinstance(dataset, pipelib.Dataset):
+        if isinstance(dataset, Dataset):
             self._dataset = dataset._dataset
         else:
             self._dataset = dataset
@@ -67,14 +66,14 @@ class Dataset:
         return PipelinedDataset(self, f)
 
     def zip(self, *others):
-        assert all(isinstance(other, pipelib.Dataset) for other in others)
+        assert all(isinstance(other, Dataset) for other in others)
 
         def f(dataset):
             yield from zip(dataset, *others)
         return PipelinedDataset(self, f)
 
     def concat(self, *others):
-        assert all(isinstance(other, pipelib.Dataset) for other in others)
+        assert all(isinstance(other, Dataset) for other in others)
 
         def f(dataset):
             yield from chain(dataset, *others)
@@ -102,10 +101,10 @@ class Dataset:
         return next(iter(self))
 
     def save(self, filename):
-        evaluated_dataset = list(self)
+        cache = list(self)
         with open(filename, 'wb') as f:
-            pickle.dump(evaluated_dataset, f)
-        return self
+            pickle.dump(cache, f)
+        return CacheDataset(self, cache)
 
     @staticmethod
     def load(filename):
@@ -137,7 +136,7 @@ class _NestedFunc:
 class PipelinedDataset(Dataset):
 
     def __init__(self, dataset, func):
-        if not isinstance(dataset, pipelib.core.PipelinedDataset):
+        if not isinstance(dataset, PipelinedDataset):
             self._func = func
         else:
             self._func = _NestedFunc(dataset._func, func)
@@ -146,6 +145,16 @@ class PipelinedDataset(Dataset):
 
     def __iter__(self):
         yield from self._func(self._dataset)
+
+
+class CacheDataset(PipelinedDataset):
+
+    def __init__(self, dataset, cache):
+        super().__init__(dataset, lambda x: x)
+        self._cache = cache
+
+    def __iter__(self):
+        yield from self._cache
 
 
 class _Repeated:

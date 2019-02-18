@@ -221,6 +221,14 @@ class DatasetTestCase(TestCase):
         expected = [x ** 2 for x in self.base if x % 2 == 0]
         self.assertListEqual(data.all(), expected)
         self.check_correct_pipelined_dataset(data, self.base)
+        self.assertIsInstance(data, pipelib.core.CacheDataset)
+
+        data = data.map(lambda x: x ** 2)
+        result = list(data._func(self.base))
+        expected = [x ** 2 for x in expected]
+        self.assertListEqual(data.all(), expected)
+        self.assertListEqual(result, expected)
+        self.check_correct_pipelined_dataset(data, self.base)
 
     @patch('pipelib.core.open')
     @patch('pipelib.core.pickle.load')
